@@ -1,7 +1,8 @@
 import urllib.request
 from lxml import html
 from lxml import etree
-
+from bs4 import BeautifulSoup
+import textwrap
 
 class Tag:
     _name = None
@@ -90,7 +91,7 @@ class MiniReadability:
     @property
     def get_article(self):
         article_text = ''
-        tags_with_text = self.get_default_tags()
+        tags_with_text = self.get_default_meta_tags()
         # print(tags_with_text)
         with urllib.request.urlopen(self._url) as f:
             html_raw = f.read().decode('utf-8')
@@ -132,42 +133,89 @@ class MiniReadability:
                 root_node = big_fat_node
             print('root node %s : %s' % (root_node.tag, root_node.attrib))
 
-            article_text = self._get_text_from_node(root_node, text_tags)
+            article_text = self._get_text_nodes_from_parent(root_node, text_tags)
 
         return article_text
 
+    @property
+    def get_article_bs(self)-> str:
+        article_text = ''
+        meta_tags = self.get_default_meta_tags()
+        text_tags = self.get_default_text_tags()
+        delete_tags = self.get_default_deleted_tags()
+        with urllib.request.urlopen(self._url) as f:
+            #TODO: добавить поиск шаблонов по имени сайта
+            html_raw = f.read().decode('utf-8')
+            root_bs = BeautifulSoup(html_raw, "html.parser")
+            text_nodes = self._get_nodes_with_text_bs(root_bs, meta_tags, text_tags, delete_tags)
+            # for node in text_nodes:
+            #     print(node)
+            if len(meta_tags) == 0:
+                # сайт был без шаблона, надо найти <div> с самым длинным текстом
+                fat_text_node = self.get_parent_node_with_longest_text(text_nodes)
+                text_nodes = self._get_text_nodes_from_parent(fat_text_node, text_tags)
+            article_text = self._get_text_from_nodes(text_nodes, [])
+        return article_text
+
     @staticmethod
-    def get_default_tags():
-        # tags = ['p', 'h1', 'h2', 'h3']
-        tags = ['div']
-        return tags
+    def get_default_meta_tags():
+        return []
 
-    # def get_first_tag(self, html_raw: str, start_index):
-    #     raw_len = len(html_raw)
-    #     i = 0
-    #     while i < raw_len:
+    @staticmethod
+    def get_default_text_tags():
+        return ['p']
 
-    def _get_text_from_node(self, node, text_tags) ->str:
-        text = ''
-        all_nodes = node.xpath('.//*')
-        text_nodes = [node for node in all_nodes if node.tag in text_tags]
+    @staticmethod
+    def get_default_deleted_tags():
+        return ['footer']
 
-        # for t in text_tags:
-        #     nodes = node.xpath('.//' + t)
-        #     if len(nodes):
-        #         text_nodes += nodes
+    def _get_nodes_with_text_bs(self, root_bs, meta_tags, text_tags, delete_tags)-> list:
+        delete_nodes = root_bs.find_all(delete_tags)
+        for delete in delete_nodes:
+            delete.extract()
 
+        nodes_with_text_tags = []
+        if len(meta_tags) > 0:
+            # TODO: add find all meta nodes
+            pass
+        else:
+            nodes_with_text_tags.append(root_bs)
+
+        node_text = root_bs.find_all(text_tags)
+        return node_text
+
+    @staticmethod
+    def get_parent_node_with_longest_text(text_nodes):
+        parents = {}
         for node in text_nodes:
-            print(node.text_content())
-            children = node.xpath('.//*')
-            # if children:
-            #     for child in children:
-            #         print(child.text_content())
-            # else:
-            #     print(node.text)
+            parent = node.parent
+            if parent in parents.keys():
+                parents[parent] += len(node.text)
+            else:
+                parents.update({parent: len(node.text)})
+        # for key, value in parents.items():
+        #     print(key.name + ' : ', end='')
+        #     print(key.attrs)
+        #     print(value)
+        #     print()
+        max_len = max(parents.values())
+        max_node = [key for key, value in parents.items() if value == max_len]
+        return max_node[0]
 
+    @staticmethod
+    def _get_text_nodes_from_parent(node, text_tags) ->str:
+        return node.find_all(text_tags)
+
+    @staticmethod
+    def _get_text_from_nodes(text_nodes, tags_replace_template)-> str:
+        text = ''
+        for node in text_nodes:
+            refs = node.find_all('a')
+            for ref in refs:
+                ref_str = ref.text + ' [' + ref.get('href') + ']'
+                ref.replaceWith(ref_str)
+            text += '\n'.join(textwrap.wrap(node.text)) + '\n\n'
         return text
-
 
     # def _get_children_max_depth(self, node, tag_name) ->int:
     #     children = node.xpath('./' + tag_name)
