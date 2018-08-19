@@ -1,0 +1,6 @@
+.idea/**
+!.idea/indexLayout.xml
+!.idea/vcs.xml
+venv/**
+__pycache__/nonogram.cpython-37.pyc
+__pycache__/
