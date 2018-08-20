@@ -45,11 +45,12 @@ if __name__ == '__main__':
     # if len(sys.argv) > 1:
     #     main(sys.argv[1])
     test_url = r'https://lenta.ru/news/2018/08/13/ecological_tax/'
-    # test_url = r'http://www.vesti.ru/doc.html?id=2699112&cid=9'
+    test_url = r'http://www.vesti.ru/doc.html?id=2699112&cid=9'
     # test_url = r'http://expert.ru/2015/12/14/kitaj-zateyal-novuyu-igru-protiv-dollara/'
     # test_url = r'http://htmlbook.ru/html/span '
+    test_url = r'http://rtown.ru/sopernikami-poleta-stanut-12-komand.html'
     test_arg = [test_url]
     main(test_arg)
-    input()
+    # input()
 else:
     print('not main')

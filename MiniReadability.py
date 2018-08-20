@@ -5,15 +5,7 @@ import urllib.parse
 from lxml import html
 from bs4 import BeautifulSoup
 import textwrap
-
-TEMPLATES = {'lenta.ru': {
-                            'meta_tags': [{'div': {'class': 'b-topic__content'}}],
-                            'text_tags': ['h1', 'p'],
-                            'delete_tags': []
-                         }
-
-             }
-
+from mini_templates import Tmp
 
 
 class Tag:
@@ -153,7 +145,8 @@ class MiniReadability:
         article_text = ''
         with urllib.request.urlopen(self._url) as f:
             host_name = self._get_host_name(self._url)
-            template = self._get_templates_from_host_name(host_name)
+            tmp = Tmp()
+            template = tmp.get_templates_from_host_name(host_name)
             meta_tags = template['meta_tags']
             text_tags = template['text_tags']
             delete_tags = template['delete_tags']
@@ -169,33 +162,13 @@ class MiniReadability:
         print(article_text)
         return article_text
 
-    @staticmethod
-    def get_default_meta_tags():
-        return []
-
-    @staticmethod
-    def get_default_text_tags():
-        return ['p']
-
-    @staticmethod
-    def get_default_deleted_tags():
-        return ['footer']
-
-    def get_default_template(self):
-        return {'meta_tags': self.get_default_meta_tags(),
-                'text_tags': self.get_default_text_tags(),
-                'delete_tags': self.get_default_deleted_tags()}
 
     @staticmethod
     def _get_host_name(url):
         parse_url = urllib.parse.urlparse(url)
         return parse_url.hostname
 
-    def _get_templates_from_host_name(self, host_name):
-        template = TEMPLATES.get(host_name)
-        if template is None:
-            return self.get_default_template()
-        return template
+
 
     def _get_nodes_with_text_bs(self, root_bs, meta_tags, text_tags, delete_tags)-> list:
         if len(delete_tags) > 0:

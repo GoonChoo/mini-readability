@@ -1,0 +1,19 @@
+{
+	"lenta.ru":		{
+						"meta_tags": [{"div": {"class": "b-topic__content"}}],
+						"text_tags": ["h1", "p"],
+						"delete_tags": ["footer"]
+					},
+
+	"www.vesti.ru":	{
+						"meta_tags": [{"div": {"class": "article"}}],
+						"text_tags": ["h1", "h3", "p"],
+						"delete_tags": ["footer"]
+					},
+					
+	"rtown.ru":		{
+						"meta_tags": [{"div": {"class": "col-md-8 col-xs-12 osnovnoy"}}],
+						"text_tags": ["h1", "p"],
+						"delete_tags": ["footer"]
+					}
+}
