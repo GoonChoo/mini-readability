@@ -1,8 +1,20 @@
+# coding: utf-8
+
 import urllib.request
+import urllib.parse
 from lxml import html
-from lxml import etree
 from bs4 import BeautifulSoup
 import textwrap
+
+TEMPLATES = {'lenta.ru': {
+                            'meta_tags': [{'div': {'class': 'b-topic__content'}}],
+                            'text_tags': ['h1', 'p'],
+                            'delete_tags': []
+                         }
+
+             }
+
+
 
 class Tag:
     _name = None
@@ -88,73 +100,73 @@ class MiniReadability:
     def __init__(self, url):
         self._url = url
 
-    @property
-    def get_article(self):
+    # @property
+    # def get_article(self):
+    #     article_text = ''
+    #     tags_with_text = self.get_default_meta_tags()
+    #     # print(tags_with_text)
+    #     with urllib.request.urlopen(self._url) as f:
+    #         html_raw = f.read().decode('utf-8')
+    #         # print(html_raw)
+    #         # strings = self.get_article(html_raw, tags_with_text)
+    #
+    #         # шаблон для мета тегов разметки, внутри которых может быть текст
+    #         meta_tags = ['div']
+    #         # шаблон для тегов в которых есть текст
+    #         text_tags = ['p', 'h1']
+    #         # поиск всех мета тэгов, в которых есть тэги с текстом
+    #         # получаем словарь {node: text_len}
+    #         nodes_with_text_tags = self._get_nodes_with_text(html_raw, meta_tags, text_tags)
+    #         for key, value in nodes_with_text_tags.items():
+    #             print('node %s : %s text tags number = %d' % (key.tag, key.attrib, value))
+    #
+    #         # находим среди всех мета тэгов, тэг с наибольшим количеством текста
+    #         max_text_len = max(nodes_with_text_tags.values())
+    #         print('max text tags number in node = %d' % max_text_len)
+    #         fattest_nodes = [key for key, value in nodes_with_text_tags.items() if value == max_text_len]
+    #         print('fattest nodes:')
+    #         for node in fattest_nodes:
+    #             print('node %s : %s' % (node.tag, node.attrib))
+    #         # если
+    #         # TODO: remove magic number
+    #         if len(fattest_nodes) > 1:
+    #             # TODO: добавить фильтр на длину реального текста, а не количества тэгов с текстом
+    #             pass
+    #
+    #         # поднимаемся на к родителю выбранного нода,
+    #         # чтобы найти возможный заголовок и остальные абзацы
+    #         if len(fattest_nodes) > 0:
+    #             big_fat_node = fattest_nodes[0]
+    #         else:
+    #             return ''
+    #
+    #         root_node = big_fat_node.getparent()
+    #         if root_node is None:
+    #             root_node = big_fat_node
+    #         print('root node %s : %s' % (root_node.tag, root_node.attrib))
+    #
+    #         article_text = self._get_text_nodes_from_parent(root_node, text_tags)
+    #
+    #     return article_text
+
+    def get_article_bs(self):
         article_text = ''
-        tags_with_text = self.get_default_meta_tags()
-        # print(tags_with_text)
         with urllib.request.urlopen(self._url) as f:
-            html_raw = f.read().decode('utf-8')
-            # print(html_raw)
-            # strings = self.get_article(html_raw, tags_with_text)
-
-            # шаблон для мета тегов разметки, внутри которых может быть текст
-            meta_tags = ['div']
-            # шаблон для тегов в которых есть текст
-            text_tags = ['p', 'h1']
-            # поиск всех мета тэгов, в которых есть тэги с текстом
-            # получаем словарь {node: text_len}
-            nodes_with_text_tags = self._get_nodes_with_text(html_raw, meta_tags, text_tags)
-            for key, value in nodes_with_text_tags.items():
-                print('node %s : %s text tags number = %d' % (key.tag, key.attrib, value))
-
-            # находим среди всех мета тэгов, тэг с наибольшим количеством текста
-            max_text_len = max(nodes_with_text_tags.values())
-            print('max text tags number in node = %d' % max_text_len)
-            fattest_nodes = [key for key, value in nodes_with_text_tags.items() if value == max_text_len]
-            print('fattest nodes:')
-            for node in fattest_nodes:
-                print('node %s : %s' % (node.tag, node.attrib))
-            # если
-            # TODO: remove magic number
-            if len(fattest_nodes) > 1:
-                # TODO: добавить фильтр на длину реального текста, а не количества тэгов с текстом
-                pass
-
-            # поднимаемся на к родителю выбранного нода,
-            # чтобы найти возможный заголовок и остальные абзацы
-            if len(fattest_nodes) > 0:
-                big_fat_node = fattest_nodes[0]
-            else:
-                return ''
-
-            root_node = big_fat_node.getparent()
-            if root_node is None:
-                root_node = big_fat_node
-            print('root node %s : %s' % (root_node.tag, root_node.attrib))
-
-            article_text = self._get_text_nodes_from_parent(root_node, text_tags)
-
-        return article_text
-
-    @property
-    def get_article_bs(self)-> str:
-        article_text = ''
-        meta_tags = self.get_default_meta_tags()
-        text_tags = self.get_default_text_tags()
-        delete_tags = self.get_default_deleted_tags()
-        with urllib.request.urlopen(self._url) as f:
-            #TODO: добавить поиск шаблонов по имени сайта
+            host_name = self._get_host_name(self._url)
+            template = self._get_templates_from_host_name(host_name)
+            meta_tags = template['meta_tags']
+            text_tags = template['text_tags']
+            delete_tags = template['delete_tags']
             html_raw = f.read().decode('utf-8')
             root_bs = BeautifulSoup(html_raw, "html.parser")
-            text_nodes = self._get_nodes_with_text_bs(root_bs, meta_tags, text_tags, delete_tags)
-            # for node in text_nodes:
-            #     print(node)
+            print('site:', host_name, end=' ')
             if len(meta_tags) == 0:
-                # сайт был без шаблона, надо найти <div> с самым длинным текстом
-                fat_text_node = self.get_parent_node_with_longest_text(text_nodes)
-                text_nodes = self._get_text_nodes_from_parent(fat_text_node, text_tags)
+                print('template not find')
+            else:
+                print('template find')
+            text_nodes = self._get_nodes_with_text_bs(root_bs, meta_tags, text_tags, delete_tags)
             article_text = self._get_text_from_nodes(text_nodes, [])
+        print(article_text)
         return article_text
 
     @staticmethod
@@ -169,20 +181,45 @@ class MiniReadability:
     def get_default_deleted_tags():
         return ['footer']
 
-    def _get_nodes_with_text_bs(self, root_bs, meta_tags, text_tags, delete_tags)-> list:
-        delete_nodes = root_bs.find_all(delete_tags)
-        for delete in delete_nodes:
-            delete.extract()
+    def get_default_template(self):
+        return {'meta_tags': self.get_default_meta_tags(),
+                'text_tags': self.get_default_text_tags(),
+                'delete_tags': self.get_default_deleted_tags()}
 
-        nodes_with_text_tags = []
-        if len(meta_tags) > 0:
-            # TODO: add find all meta nodes
+    @staticmethod
+    def _get_host_name(url):
+        parse_url = urllib.parse.urlparse(url)
+        return parse_url.hostname
+
+    def _get_templates_from_host_name(self, host_name):
+        template = TEMPLATES.get(host_name)
+        if template is None:
+            return self.get_default_template()
+        return template
+
+    def _get_nodes_with_text_bs(self, root_bs, meta_tags, text_tags, delete_tags)-> list:
+        if len(delete_tags) > 0:
+            delete_nodes = root_bs.find_all(delete_tags)
+            for delete in delete_nodes:
+                delete.extract()
+        text_nodes = []
+        if len(meta_tags) == 0:
+            # сайт был без шаблона, надо найти <div> с самым длинным текстом
+            text_nodes = root_bs.find_all(text_tags)
+            fat_text_node = self.get_parent_node_with_longest_text(text_nodes)
+            text_nodes = fat_text_node.find_all(text_tags)
             pass
         else:
-            nodes_with_text_tags.append(root_bs)
-
-        node_text = root_bs.find_all(text_tags)
-        return node_text
+            # сайт с шаблоном, ищем по шаблону
+            meta_nodes = []
+            for mt in meta_tags:
+                for key, value in mt.items():
+                    nodes_list = root_bs.find_all(key, value)
+                    meta_nodes += nodes_list
+            for node in meta_nodes:
+                list_n = node.find_all(text_tags)
+                text_nodes += list_n
+        return text_nodes
 
     @staticmethod
     def get_parent_node_with_longest_text(text_nodes):
