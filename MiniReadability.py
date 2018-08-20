@@ -152,14 +152,16 @@ class MiniReadability:
             delete_tags = template['delete_tags']
             html_raw = f.read().decode('utf-8')
             root_bs = BeautifulSoup(html_raw, "html.parser")
+            # print(html_raw)
             print('site:', host_name, end=' ')
             if len(meta_tags) == 0:
                 print('template not find')
             else:
                 print('template find')
             text_nodes = self._get_nodes_with_text_bs(root_bs, meta_tags, text_tags, delete_tags)
+            # print(text_nodes)
             article_text = self._get_text_from_nodes(text_nodes, [])
-        print(article_text)
+        # print(article_text)
         return article_text
 
 
@@ -167,8 +169,6 @@ class MiniReadability:
     def _get_host_name(url):
         parse_url = urllib.parse.urlparse(url)
         return parse_url.hostname
-
-
 
     def _get_nodes_with_text_bs(self, root_bs, meta_tags, text_tags, delete_tags)-> list:
         if len(delete_tags) > 0:
@@ -203,11 +203,6 @@ class MiniReadability:
                 parents[parent] += len(node.text)
             else:
                 parents.update({parent: len(node.text)})
-        # for key, value in parents.items():
-        #     print(key.name + ' : ', end='')
-        #     print(key.attrs)
-        #     print(value)
-        #     print()
         max_len = max(parents.values())
         max_node = [key for key, value in parents.items() if value == max_len]
         return max_node[0]

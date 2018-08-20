@@ -9,7 +9,7 @@ class Tmp:
             self._templates = json.load(f)
         except Exception:
             self._templates = {}
-        print(self._templates)
+        # print(self._templates)
 
     def get_templates_from_host_name(self, host_name):
         template = self._templates.get(host_name)
