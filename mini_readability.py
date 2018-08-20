@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         test_url = sys.argv[1]
 
-    test_url = r'https://lenta.ru/news/2018/08/13/ecological_tax/'
+    # test_url = r'https://lenta.ru/news/2018/08/13/ecological_tax/'
     # test_url = r'http://www.vesti.ru/doc.html?id=2699112&cid=9'
     # test_url = r'http://expert.ru/2015/12/14/kitaj-zateyal-novuyu-igru-protiv-dollara/'
     # test_url = r'http://htmlbook.ru/html/span '
