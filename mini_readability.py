@@ -3,16 +3,16 @@ import sys
 from MiniReadability import *
 
 
-def main(url):
-    if len(url) > 0:
-        article_finder = MiniReadability(url)
+def main(article_url):
+    if len(article_url) > 0:
+        article_finder = MiniReadability(article_url)
         try:
             article_text = article_finder.get_article_bs()
         except Exception as e:
             print('Что-то пошло не так при парсинге статьи по ссылке')
 
         try:
-            directory, file_name = get_path_and_file_name_from_url(url)
+            directory, file_name = get_path_and_file_name_from_url(article_url)
         except Exception as e:
             print('Что-то не так с парсингом ссылки в имя папки')
 
@@ -50,10 +50,6 @@ def get_path_and_file_name_from_url(url):
     file_name = file_name.replace('.', '_')
     file_name = file_name.replace('?', '_')
     file_name += '.txt'
-    # file_name = directory + file_name
-    # print('url = ', url)
-    # print('path = ',  directory)
-    # print('file name = ', file_name)
     return directory, file_name
 
 
@@ -62,14 +58,6 @@ if __name__ == '__main__':
     url = ''
     if len(sys.argv) > 1:
         url = sys.argv[1]
-
-    # test_url = r'https://lenta.ru/news/2018/08/13/ecological_tax/'
-    # test_url = r'http://www.vesti.ru/doc.html?id=2699112&cid=9'
-    # test_url = r'http://expert.ru/2015/12/14/kitaj-zateyal-novuyu-igru-protiv-dollara/'
-    # test_url = r'http://htmlbook.ru/html/span '
-    # test_url = r'http://rtown.ru/sopernikami-poleta-stanut-12-komand.html'
-    # test_url = r'https://tensor.ru'
     main(url)
-    # input()
 else:
     print('not main')
