@@ -56,7 +56,7 @@ def get_path_and_file_name_from_url(url):
 
 
 if __name__ == '__main__':
-    print(sys.argv)
+    # print(sys.argv)
     if len(sys.argv) > 1:
         test_url = sys.argv[1]
 
