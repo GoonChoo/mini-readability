@@ -219,7 +219,11 @@ class MiniReadability:
             for ref in refs:
                 ref_str = ref.text + ' [' + ref.get('href') + ']'
                 ref.replaceWith(ref_str)
-            text += '\n'.join(textwrap.wrap(node.text)) + '\n\n'
+            node_text = node.text
+            node_text = ''.join(node_text)
+            node_text = node_text.replace('\n', '')
+            node_text = node_text.replace('\t', '')
+            text += '\n'.join(textwrap.wrap(node_text)) + '\n\n'
         return text
 
     # def _get_children_max_depth(self, node, tag_name) ->int:

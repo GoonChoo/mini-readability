@@ -25,7 +25,6 @@ def main(url):
             print(e)
 
 
-
 def save_text_to_file(text, directory, file_name):
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -41,7 +40,10 @@ def get_path_and_file_name_from_url(url):
     if file_name[-1] == '/':
         file_name = file_name[:-1]
     index = file_name.rfind('/')
-    directory = file_name[:index]
+    if index == -1:
+        directory = file_name
+    else:
+        directory = file_name[:index]
     directory = directory.replace('/', '\\')
     directory = os.getcwd() + '\\output\\' + '\\' + directory + '\\'
     file_name = file_name[index + 1:]
@@ -57,15 +59,17 @@ def get_path_and_file_name_from_url(url):
 
 if __name__ == '__main__':
     # print(sys.argv)
+    url = ''
     if len(sys.argv) > 1:
-        test_url = sys.argv[1]
+        url = sys.argv[1]
 
     # test_url = r'https://lenta.ru/news/2018/08/13/ecological_tax/'
     # test_url = r'http://www.vesti.ru/doc.html?id=2699112&cid=9'
     # test_url = r'http://expert.ru/2015/12/14/kitaj-zateyal-novuyu-igru-protiv-dollara/'
     # test_url = r'http://htmlbook.ru/html/span '
     # test_url = r'http://rtown.ru/sopernikami-poleta-stanut-12-komand.html'
-    main(test_url)
+    # test_url = r'https://tensor.ru'
+    main(url)
     # input()
 else:
     print('not main')

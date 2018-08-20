@@ -23,7 +23,7 @@ class Tmp:
 
     @staticmethod
     def _get_default_text_tags():
-        return ['p', 'h1']
+        return ['p', 'h1', 'h2', 'li']
 
     @staticmethod
     def _get_default_deleted_tags():
